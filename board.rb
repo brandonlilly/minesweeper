@@ -6,6 +6,7 @@ class Board
     @height = height
     @bombs =  bombs
     @board.flatten.each { |tile| tile.populate_neighbors(self) }
+    @selection = 0
   end
 
   def make_move(coords)
