@@ -2,12 +2,13 @@ require_relative 'board'
 require_relative 'tile'
 require 'yaml'
 require 'byebug'
+require 'colorize'
 
 class Game
   attr_reader :board
 
   def initialize
-    @board = Board.new(5, 5, 4)
+    @board = Board.new(9, 9, 10)
   end
 
   def run
@@ -59,7 +60,7 @@ class Game
         load(name)
         next
       end
-      puts "Invalid command"
+      puts "Invalid move"
     end
   end
 
