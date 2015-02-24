@@ -11,7 +11,7 @@ class Tile
 
   def reveal
     @revealed = true
-    if self.neighbor_bomb_count == 0
+    if self.neighbor_bomb_count == 0 && !mine?
       applicable = @neighbors.reject do |neighbor|
         neighbor.mine? || neighbor.revealed? || neighbor.flag?
       end
@@ -49,7 +49,6 @@ class Tile
   end
 
   def toggle_flag
-    # @flagged ? @flagged = false : @flagged = true
     @flagged = !@flagged
   end
 
@@ -61,26 +60,28 @@ class Tile
     @flagged
   end
 
+  def highlighted?
+    false
+  end
+
   def render
-    if flag?
-      "F"
+    char = if flag?
+      "⚑".colorize(:red)
     elsif !revealed?
       " "
     elsif mine?
-      "X"
+      #💣
+      "X".colorize(:red)
     else
-      neighbor_bomb_count == 0 ? "-" : neighbor_bomb_count
+      neighbor_bomb_count == 0 ? " " : neighbor_bomb_count.to_s
+    end
+    if highlighted?
+      " #{char} ".colorize(background: :light_yellow)
+    elsif revealed? && !mine? && !flag?
+      " #{char} ".colorize(background: :light_blue)
+    else
+      " #{char} ".colorize(background: :white)
     end
   end
-  #
-  # def render_dev
-  #   if flag?
-  #     "F"
-  #   elsif mine?
-  #     "X"
-  #   else
-  #     neighbor_bomb_count == 0 ? "_" : neighbor_bomb_count
-  #   end
-  # end
 
 end

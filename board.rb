@@ -13,7 +13,7 @@ class Board
       tile = self[coords]
       tile.reveal
     else
-      puts "Pick a real move...dummy"
+      puts "Move is out of bounds"
     end
   end
 
@@ -49,23 +49,20 @@ class Board
   end
 
   def render
-    lines = @board.transpose.reverse.map do |row|
-      line = row.map do |tile|
+    @board.transpose.reverse.map do |row|
+      row.map do |tile|
         tile.render
-      end.join(" | ")
-      "| #{line} |"
+      end.join
     end
-    [ "-" * (@width * 4 + 1),
-      lines,
-      "-" * (@width * 4 + 1) ]
   end
 
   def display
-    puts render
+    puts '',render,''
   end
 
   def place_flag(coords)
-    self[coords].toggle_flag if in_bound?(coords)
+    tile = self[coords]
+    tile.toggle_flag if in_bound?(coords) && !tile.revealed?
   end
 
   def tiles
