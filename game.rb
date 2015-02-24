@@ -4,23 +4,50 @@ require 'yaml'
 require 'byebug'
 require 'colorize'
 
+def get_char
+  state = `stty -g`
+  `stty raw -echo -icanon isig`
+
+  STDIN.getc.chr
+ensure
+  `stty #{state}`
+end
+
 class Game
   attr_reader :board
 
   def initialize
     @board = Board.new(9, 9, 10)
+    @selection = [0, 0]
+  end
+
+  def test
+    loop do
+      stroke = get_char
+      p stroke
+      exit if stroke == "\e"
+    end
   end
 
   def run
+
     until won? || lost?
       board.display
 
-      move = get_move(board)
-      board.populate_mines(move) unless board.populated?
-      if move.last
-        board.place_flag(move)
-      else
-        board.make_move(move)
+      stroke = get_char
+      case stroke
+      when /[wasd]/
+        selection = move_selection(stroke)
+        board.set_selection(selection)
+      when "f"
+        board.place_flag(selection)
+      when " "
+        board.make_move(selection)
+        board.populate_mines(selection) unless board.populated?
+      when "\u0013" # ctrl-s
+        save
+      when "\f"
+        load
       end
     end
 
@@ -43,33 +70,16 @@ class Game
     @board.tiles.any? { |tile| tile.mine? && tile.revealed? }
   end
 
-  def get_move(board)
-    loop do
-      puts "Make a choice"
-      input = gets.chomp.downcase
-      if input[/\d+.*\d/]
-        flag = (input[0] == "f")
-        coords = input.scan(/\d+/).map {|n| n.to_i - 1}.first(2) << flag
-        return coords if board.in_bound?(coords)
-      elsif input.include?('save')
-        name = input.split(' ').last
-        save(name)
-        next
-      elsif input.include?('load')
-        name = input.split(' ').last
-        load(name)
-        next
-      end
-      puts "Invalid move"
-    end
+  def make_selection(stroke)
+
   end
 
-  def save(name)
+  def save(name = "default")
     puts "Saving game '#{name}'..", ' '
     File.write(save_path(name), @board.to_yaml)
   end
 
-  def load(name)
+  def load(name = "default")
     path = save_path(name)
     if File.exist?(path)
       puts "Loading game '#{name}'..", ' '
@@ -91,5 +101,5 @@ end
 
 if __FILE__ == $PROGRAM_NAME
   game = Game.new
-  game.run
+  game.test
 end
