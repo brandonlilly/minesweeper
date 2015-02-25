@@ -6,7 +6,6 @@ class Board
     @height = height
     @bombs =  bombs
     @board.flatten.each { |tile| tile.populate_neighbors(self) }
-    @selection = 0
   end
 
   def make_move(coords)
@@ -30,10 +29,7 @@ class Board
       rand_tile = @board[rand_x][rand_y]
       tile = self[coords]
 
-      unless rand_tile.mine? ||
-             rand_tile == tile ||
-             tile.neighbor?(rand_tile)
-
+      unless rand_tile.mine? || rand_tile == tile || tile.neighbor?(rand_tile)
         rand_tile.set_mine
         count += 1
       end
@@ -58,12 +54,18 @@ class Board
   end
 
   def display
+    system "clear" or system "cls"
     puts '',render,''
   end
 
   def place_flag(coords)
     tile = self[coords]
     tile.toggle_flag if in_bound?(coords) && !tile.revealed?
+  end
+
+  def set_selection(pos)
+    tiles.each(&:remove_highlight)
+    self[pos].set_highlight
   end
 
   def tiles

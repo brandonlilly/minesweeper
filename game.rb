@@ -1,8 +1,8 @@
 require_relative 'board'
 require_relative 'tile'
 require 'yaml'
-require 'byebug'
 require 'colorize'
+require 'byebug'
 
 def get_char
   state = `stty -g`
@@ -18,7 +18,7 @@ class Game
 
   def initialize
     @board = Board.new(9, 9, 10)
-    @selection = [0, 0]
+    @selection = [1, 1]
   end
 
   def test
@@ -32,18 +32,18 @@ class Game
   def run
 
     until won? || lost?
+      board.set_selection(@selection)
       board.display
 
       stroke = get_char
       case stroke
       when /[wasd]/
-        selection = move_selection(stroke)
-        board.set_selection(selection)
+        move_selection(stroke)
       when "f"
-        board.place_flag(selection)
-      when " "
-        board.make_move(selection)
-        board.populate_mines(selection) unless board.populated?
+        board.place_flag(@selection)
+      when "\r", "e", " "
+        board.populate_mines(@selection) unless board.populated?
+        board.make_move(@selection)
       when "\u0013" # ctrl-s
         save
       when "\f"
@@ -70,8 +70,18 @@ class Game
     @board.tiles.any? { |tile| tile.mine? && tile.revealed? }
   end
 
-  def make_selection(stroke)
-
+  def move_selection(stroke)
+    offsets = {
+      w: [0, 1],
+      a: [-1,0],
+      s: [0,-1],
+      d: [1, 0]
+    }
+    stroke = stroke.to_sym
+    x, y = @selection
+    x_shift, y_shift = offsets[stroke]
+    pos = [x + x_shift, y + y_shift]
+    @selection = pos if @board.in_bound?(pos)
   end
 
   def save(name = "default")
@@ -101,5 +111,5 @@ end
 
 if __FILE__ == $PROGRAM_NAME
   game = Game.new
-  game.test
+  game.run
 end

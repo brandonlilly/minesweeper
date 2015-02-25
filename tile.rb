@@ -7,6 +7,7 @@ class Tile
     @flagged =  false
     @x, @y = pos
     @neighbors = []
+    @highlighted = false
   end
 
   def reveal
@@ -60,8 +61,16 @@ class Tile
     @flagged
   end
 
+  def set_highlight
+    @highlighted = true
+  end
+
+  def remove_highlight
+    @highlighted = false
+  end
+
   def highlighted?
-    false
+    @highlighted
   end
 
   def render
@@ -78,7 +87,7 @@ class Tile
     if highlighted?
       " #{char} ".colorize(background: :light_yellow)
     elsif revealed? && !mine? && !flag?
-      " #{char} ".colorize(background: :light_blue)
+      " #{char} ".colorize(color: :white, background: :light_blue)
     else
       " #{char} ".colorize(background: :white)
     end
