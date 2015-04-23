@@ -47,9 +47,7 @@ class Board
 
   def render
     @board.transpose.reverse.map do |row|
-      row.map do |tile|
-        tile.render
-      end.join
+      row.map(&:render).join()
     end
   end
 
